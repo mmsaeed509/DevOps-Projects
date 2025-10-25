@@ -104,6 +104,7 @@ Create docker compose ([**`docker-compose-networks.yaml`**](./docker-compose-net
 ```bash
 
 docker compose -f docker-compose-networks.yaml up
+# OR
 docker compose -f docker-compose-networks.yaml up -d 
 ```
 ![](./imgs/5.png)
