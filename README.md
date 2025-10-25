@@ -91,3 +91,81 @@ read the `README.md` in the [**`k8s`**](./k8s/) to deploy
 > I'm using `minikube`
 
 ![](./imgs/4.png)
+
+
+---
+
+### Task 2 (optional)
+
+Create docker compose ([**`docker-compose-networks.yaml`**](./docker-compose-networks.yaml)) setup with 3 separate networks for each container and make them communicate with each other(They can see each other) with their names, without a shared network
+
+#### run:
+
+```bash
+
+docker compose -f docker-compose-networks.yaml up
+docker compose -f docker-compose-networks.yaml up -d 
+```
+![](./imgs/5.png)
+![](./imgs/6.png)
+
+#### clean:
+
+```bash
+docker compose -f docker-compose-networks.yaml down
+```
+
+#### How it works:
+
+- Three Separate Networks
+  - `db-network`: Only mysql-db container
+  - `backend-network`: Only go-backend container  
+  - `nginx-network`: Only nginx container
+
+- Each container is completely isolated in its own network. no direct container-to-container communication.
+
+- Containers Communicate Through the Host Gateway
+  - ```
+     extra_hosts:
+     - "go-backend:172.17.0.1"  # Maps service name to Docker host IP
+     - "db:172.17.0.1"
+    ```
+  - `172.17.0.1` is Docker's default bridge gateway IP on Linux
+  - This allows containers to resolve service names to the host IP
+
+#### Communication Flow
+
+- **nginx config**: server `go-backend:10000;`
+- **DNS resolution**: `go-backend` → `172.17.0.1` (via extra_hosts)
+- **Connection:** nginx connects to `172.17.0.1:10000`
+- **Host routing**: Docker host routes `:10000` → `Test-GoApp:8000`
+- **Response:** Go app responds back through the same path
+
+#### Network Architecture
+
+```bash
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   nginx-proxy   │    │   Test-GoApp    │    │   mysql-db      │
+│  (nginx-network)│    │(backend-network)│    │  (db-network)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+    ┌────▼────┐             ┌────▼────┐             ┌────▼─────┐
+    │nginx-net│             │backend- │             │db-network│
+    │172.30.x │             │net      │             │172.28.x  │
+    │         │             │172.29.x │             │          │
+    └─────────┘             └─────────┘             └──────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                        ┌────────▼─────────┐
+                        │  Docker Host     │
+                        │   172.17.0.1     │
+                        │                  │
+                        │ Port Mappings:   │
+                        │ :80 → nginx:80   │
+                        │ :443→ nginx:443  │
+                        │ :10000→ go:8000  │
+                        │ :3306→ mysql:3306│
+                        └──────────────────┘
+```

@@ -1,0 +1,66 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: db_password_123
+      MYSQL_DATABASE: example
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - db-network
+    restart: unless-stopped
+    extra_hosts:
+      - "go-backend:172.17.0.1"
+      - "nginx:172.17.0.1"
+
+  go-backend:
+    image: mmsaeed509/go-app:v1
+    container_name: Test-GoApp
+    volumes:
+      - ./backend/db-password.txt:/run/secrets/db-password
+    ports:
+      - "10000:8000"
+    depends_on:
+      - db
+    networks:
+      - backend-network
+    restart: unless-stopped
+    extra_hosts:
+      - "db:172.17.0.1"
+      - "nginx:172.17.0.1"
+
+  nginx:
+    image: mmsaeed509/go-app-nginx:v3
+    container_name: nginx-proxy
+    volumes:
+      - ./nginx-2/nginx.conf:/etc/nginx/nginx.conf
+      - nginx-ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - go-backend
+    networks:
+      - nginx-network
+    restart: unless-stopped
+    extra_hosts:
+      - "db:172.17.0.1"
+      - "go-backend:172.17.0.1"
+
+volumes:
+  db-data:
+  nginx-ssl:
+
+networks:
+  db-network:
+    driver: bridge
+    name: db-network
+  backend-network:
+    driver: bridge
+    name: backend-network
+  nginx-network:
+    driver: bridge
+    name: nginx-network
