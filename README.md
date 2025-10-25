@@ -12,8 +12,44 @@ Client → Nginx (HTTPS) → Backend API (Go) → MySQL Database
 ```
 
 ### File structure
-```bash
 
+```bash
+├── backend
+│   ├── db-password.txt
+│   ├── docker-compose.yaml
+│   ├── Dockerfile
+│   ├── go.mod
+│   ├── go.sum
+│   ├── main.go
+│   └── README.md
+├── docker-compose.yaml
+├── git-push.sh
+├── imgs
+│   ├── 1.png
+│   ├── 2.png
+│   ├── 3.png
+│   └── 4.png
+├── k8s
+│   ├── backend_deployment.yaml
+│   ├── backend_service.yaml
+│   ├── database_deployment.yaml
+│   ├── db-data-pvc.yaml
+│   ├── db-data-pv.yaml
+│   ├── db-secret.yaml
+│   ├── db-service.yaml
+│   ├── nginx-configmap.yaml
+│   ├── proxy_deployment.yaml
+│   ├── proxy_nodeport.yaml
+│   └── README.md
+├── nginx
+│   ├── Dockerfile
+│   ├── generate-ssl.sh
+│   ├── nginx.conf
+│   └── README.md
+├── project1.pdf
+└── README.md
+
+5 directories, 30 files
 ```
 
 ---
@@ -40,9 +76,7 @@ $ curl http://localhost:10000
 
 ### Build and Push nginx image
 
-- read the `README.md` in the [**`nginx`**](./nginx/)
-- update the `docker-compose.yaml` file and add `nginx`
-- run `docker-compose.yaml` and test on [**`https://localhost`**](https://localhost)
+- read the `README.md` in the [**`nginx`**](./nginx/) To build and push the image
 
 ```bash
 docker compose up -d
