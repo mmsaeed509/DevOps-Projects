@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  go-backend:
+    image: mmsaeed509/go-app:v1
+    container_name: Test-GoApp
+    volumes:
+      - /home/o0xwolf/GitHub-SSD/DevOps-Projects/backend/db-password.txt:/run/secrets/db-password
+    ports:
+      - "10000:8000"
+    restart: unless-stopped

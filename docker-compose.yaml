@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: db_password_123
+      MYSQL_DATABASE: example
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+  go-backend:
+    image: mmsaeed509/go-app:v1
+    container_name: Test-GoApp
+    volumes:
+      - ./backend/db-password.txt:/run/secrets/db-password
+    ports:
+      - "10000:8000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  nginx:
+    image: mmsaeed509/go-app-nginx:v3
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - go-backend
+    restart: unless-stopped
+
+volumes:
+  db-data:
